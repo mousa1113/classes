@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Smart Schedule v14</title>
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --glass: rgba(255, 255, 255, 0.05);
+            --green: #00ff88;
+            --red: #ff3e3e;
+            --malak-grad: linear-gradient(135deg, #ff0080, #ff8c00);
+            --mohammed-grad: linear-gradient(135deg, #007cf0, #00dfd8);
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg); color: white; margin: 0; padding: 15px;
+            min-height: 100vh; -webkit-tap-highlight-color: transparent;
+        }
+        /* تنبيه التثبيت */
+        #install-prompt {
+            position: fixed; top: 10px; left: 10px; right: 10px;
+            background: #1c222d; border: 1px solid var(--green);
+            padding: 15px; border-radius: 15px; display: none;
+            z-index: 10000; justify-content: space-between; align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .header-card {
+            background: var(--glass); padding: 20px; border-radius: 20px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;
+        }
+        .tabs-container { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; background: var(--glass); color: #777; font-weight: bold; }
+        .tab-btn.active-malak { background: var(--malak-grad); color: white; }
+        .tab-btn.active-mohammed { background: var(--mohammed-grad); color: white; }
+
+        .lesson-card {
+            background: var(--glass); border-radius: 15px; padding: 15px;
+            margin-bottom: 10px; display: flex; align-items: center;
+            border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;
+        }
+        .lesson-card.live { border-color: var(--green); background: rgba(0, 255, 136, 0.05); }
+        .item-lamp { width: 10px; height: 10px; border-radius: 50%; background: var(--red); margin-left: 12px; }
+        .live .item-lamp { background: var(--green); box-shadow: 0 0 10px var(--green); animation: blink 1.5s infinite; }
+        
+        @keyframes blink { 50% { opacity: 0.3; } }
+
+        .bottom-nav { position: fixed; bottom: 20px; left: 0; right: 0; display: flex; justify-content: center; gap: 15px; }
+        .nav-btn { width: 50px; height: 50px; border-radius: 15px; background: var(--glass); border: 1px solid rgba(255,255,255,0.1); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .content-box { width: 100%; max-width: 400px; background: #161b22; padding: 20px; border-radius: 20px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        .btn-save { background: var(--green); color: black; font-weight: bold; border: none; padding: 14px; width: 100%; border-radius: 10px; margin-top: 10px; }
+        .edit-mode-active .lesson-card { border: 1px dashed var(--green); }
+    </style>
+</head>
+<body id="mainBody">
+
+    <div id="install-prompt">
+        <span>تثبيت البرنامج على الموبايل؟</span>
+        <button onclick="triggerInstall()" style="background:var(--green); border:none; padding:8px 15px; border-radius:8px; font-weight:bold;">تثبيت الآن</button>
+    </div>
+
+    <div class="header-card">
+        <h2 id="userNameDisplay" style="margin:0;">جدول ملك</h2>
+        <div id="clock" style="color: var(--green); font-family: monospace; font-size: 1.2rem; margin-top: 5px;"></div>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-btn active-malak" id="tabMalak" onclick="switchUser('malak')">ملك</button>
+        <button class="tab-btn" id="tabMohammed" onclick="switchUser('mohammed')">محمد</button>
+    </div>
+
+    <div id="scheduleBody" style="padding-bottom: 100px;"></div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn" onclick="openSettings()">⚙️</button>
+        <button class="nav-btn" style="background: var(--green); color:black;" onclick="showFreeTime()">☕</button>
+    </div>
+
+    <div id="settingsOverlay" class="overlay">
+        <div class="content-box" id="passwordStage">
+            <h3 style="text-align: center;">رمز الدخول</h3>
+            <input type="password" id="passInput" placeholder="الباسورد (0512)" style="text-align: center;">
+            <button class="btn-save" onclick="verifyPass()">فتح التعديل</button>
+            <button onclick="closeOverlay('settingsOverlay')" style="background:none; border:none; color:white; width:100%; margin-top:15px;">إلغاء</button>
+        </div>
+        
+        <div class="content-box" id="editStage" style="display: none;">
+            <h3 id="editingTitle" style="color:var(--green); text-align:center;">تعديل المادة</h3>
+            <input type="hidden" id="editId">
+            <input type="text" id="subjectName" placeholder="اسم المادة">
+            <select id="daySelect"><option>السبت</option><option>الأحد</option><option>الإثنين</option><option>الثلاثاء</option><option>الأربعاء</option><option>الخميس</option><option>الجمعة</option></select>
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="startHour" placeholder="البدء (1-12)">
+                <select id="startPeriod"><option value="PM">مساءً</option><option value="AM">صباحاً</option></select>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="endHour" placeholder="الانتهاء (1-12)">
+                <select id="endPeriod"><option value="PM">مساءً</option><option value="AM">صباحاً</option></select>
+            </div>
+            <button class="btn-save" onclick="saveEntry()">حفظ التعديل</button>
+            <button onclick="logoutSettings()" style="background:none; border:none; color:var(--red); width:100%; margin-top: 20px;">خروج من التعديل</button>
+        </div>
+    </div>
+
+    <script>
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('install-prompt').style.display = 'flex';
+        });
+
+        async function triggerInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                document.getElementById('install-prompt').style.display = 'none';
+            }
+        }
+
+        const PASS = "0512";
+        let currentUser = 'malak';
+        let isEditMode = false;
+
+        // مواعيد الدروس الأصلية كاملة
+        const originalData = {
+            malak: [
+                { id: 1, name: "رياضة", day: "السبت", start: 14, end: 16 }, { id: 2, name: "ألماني", day: "السبت", start: 16, end: 18 }, { id: 3, name: "كيمياء", day: "السبت", start: 20.5, end: 22.5 },
+                { id: 4, name: "تاريخ", day: "الأحد", start: 16, end: 18 }, { id: 5, name: "عربي", day: "الأحد", start: 19, end: 21 }, { id: 6, name: "كورس", day: "الأحد", start: 23, end: 1 },
+                { id: 7, name: "فيزياء", day: "الإثنين", start: 14, end: 16 }, { id: 8, name: "إنجليزي", day: "الإثنين", start: 16, end: 18 },
+                { id: 9, name: "رياضة", day: "الثلاثاء", start: 14, end: 16 }, { id: 10, name: "ألماني", day: "الثلاثاء", start: 16, end: 18 }, { id: 11, name: "كيمياء", day: "الثلاثاء", start: 20.5, end: 22.5 }, { id: 12, name: "تحفيظ", day: "الثلاثاء", start: 23, end: 1 },
+                { id: 13, name: "تاريخ", day: "الأربعاء", start: 16, end: 18 }, { id: 14, name: "عربي", day: "الأربعاء", start: 19, end: 21 }, { id: 15, name: "كورس", day: "الأربعاء", start: 23, end: 1 },
+                { id: 16, name: "فيزياء", day: "الخميس", start: 14, end: 16 }, { id: 17, name: "إنجليزي", day: "الخميس", start: 16, end: 18 }, { id: 18, name: "تحفيظ", day: "الخميس", start: 23, end: 1 }
+            ],
+            mohammed: [
+                { id: 101, name: "رياضة", day: "السبت", start: 10.5, end: 13 }, { id: 102, name: "كيمياء", day: "السبت", start: 13, end: 15 }, { id: 103, name: "ألماني", day: "السبت", start: 16, end: 18 }, { id: 104, name: "كورس", day: "السبت", start: 19.5, end: 21.5 },
+                { id: 105, name: "فيزياء", day: "الأحد", start: 16, end: 18 }, { id: 106, name: "عربي", day: "الأحد", start: 19, end: 21 },
+                { id: 107, name: "رياضة", day: "الإثنين", start: 9, end: 11 }, { id: 108, name: "إنجليزي", day: "الإثنين", start: 13, end: 15 },
+                { id: 109, name: "رياضة", day: "الثلاثاء", start: 10.5, end: 13 }, { id: 110, name: "كيمياء", day: "الثلاثاء", start: 13, end: 15 }, { id: 111, name: "ألماني", day: "الثلاثاء", start: 16, end: 18 },
+                { id: 112, name: "فيزياء", day: "الأربعاء", start: 16, end: 18 }, { id: 113, name: "عربي", day: "الأربعاء", start: 19, end: 21 },
+                { id: 114, name: "رياضة", day: "الخميس", start: 9, end: 11 }, { id: 115, name: "إنجليزي", day: "الخميس", start: 13, end: 15 }
+            ]
+        };
+
+        let db = JSON.parse(localStorage.getItem('study_db_v14')) || originalData;
+
+        function render() {
+            const now = new Date();
+            const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+            const today = days[now.getDay()];
+            const hour = now.getHours() + (now.getMinutes()/60);
+            document.getElementById('clock').innerText = now.toLocaleTimeString('ar-EG');
+            
+            let html = '';
+            ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"].forEach(day => {
+                const lessons = db[currentUser].filter(l => l.day === day).sort((a,b) => a.start - b.start);
+                if(lessons.length > 0) {
+                    html += `<div style="margin:20px 5px 10px; color:#555; font-size:0.8rem;">● ${day}</div>`;
+                    lessons.forEach(l => {
+                        let isLive = (day === today && ((l.end > l.start && hour >= l.start && hour < l.end) || (l.end < l.start && (hour >= l.start || hour < l.end))));
+                        html += `<div class="lesson-card ${isLive?'live':''}" onclick="handleCardClick(${l.id})">
+                                    <div class="item-lamp"></div>
+                                    <div style="flex-grow: 1;">
+                                        <div style="font-weight: bold;">${l.name}</div>
+                                        <div style="color: #666; font-size: 0.8rem;">${fmt(l.start)} - ${fmt(l.end)}</div>
+                                    </div>
+                                    ${isEditMode ? `<button onclick="deleteItem(${l.id}, event)" style="background:none; border:none; color:var(--red); font-size:1.2rem;">🗑️</button>` : ''}
+                                </div>`;
+                    });
+                }
+            });
+            document.getElementById('scheduleBody').innerHTML = html;
+        }
+
+        function handleCardClick(id) {
+            if(!isEditMode) return;
+            const item = db[currentUser].find(l => l.id === id);
+            document.getElementById('editId').value = item.id;
+            document.getElementById('subjectName').value = item.name;
+            document.getElementById('daySelect').value = item.day;
+            document.getElementById('startHour').value = item.start % 12 || 12;
+            document.getElementById('startPeriod').value = item.start >= 12 ? "PM" : "AM";
+            document.getElementById('endHour').value = item.end % 12 || 12;
+            document.getElementById('endPeriod').value = item.end >= 12 ? "PM" : "AM";
+            document.getElementById('settingsOverlay').style.display = 'flex';
+        }
+
+        function saveEntry() {
+            const id = document.getElementById('editId').value;
+            let s = parseFloat(document.getElementById('startHour').value);
+            let e = parseFloat(document.getElementById('endHour').value);
+            if(document.getElementById('startPeriod').value === "PM" && s < 12) s += 12;
+            if(document.getElementById('startPeriod').value === "AM" && s === 12) s = 0;
+            if(document.getElementById('endPeriod').value === "PM" && e < 12) e += 12;
+            if(document.getElementById('endPeriod').value === "AM" && e === 12) e = 0;
+
+            const newData = { id: id ? Number(id) : Date.now(), name: document.getElementById('subjectName').value, day: document.getElementById('daySelect').value, start: s, end: e };
+            if(id) { const idx = db[currentUser].findIndex(l => l.id == id); db[currentUser][idx] = newData; }
+            else db[currentUser].push(newData);
+            
+            localStorage.setItem('study_db_v14', JSON.stringify(db));
+            closeOverlay('settingsOverlay'); render();
+        }
+
+        function fmt(t) { 
+            let h = Math.floor(t), m = (t % 1) !== 0 ? "30" : "00", p = h >= 12 ? "م" : "ص", dh = h % 12 || 12; 
+            return `${dh}:${m}${p}`; 
+        }
+        function switchUser(u) {
+            currentUser = u;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-malak', 'active-mohammed'));
+            document.getElementById(u === 'malak' ? 'tabMalak' : 'tabMohammed').classList.add(u === 'malak' ? 'active-malak' : 'active-mohammed');
+            document.getElementById('userNameDisplay').innerText = "جدول " + (u === 'malak' ? 'ملك' : 'محمد');
+            render();
+        }
+        function openSettings() { document.getElementById('settingsOverlay').style.display = 'flex'; }
+        function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
+        function verifyPass() {
+            if(document.getElementById('passInput').value === PASS) {
+                isEditMode = true;
+                document.getElementById('mainBody').classList.add('edit-mode-active');
+                document.getElementById('passwordStage').style.display = 'none';
+                document.getElementById('editStage').style.display = 'block';
+                render();
+            } else { alert("خطأ!"); }
+        }
+        function logoutSettings() {
+            isEditMode = false; document.getElementById('mainBody').classList.remove('edit-mode-active');
+            document.getElementById('passwordStage').style.display = 'block';
+            document.getElementById('editStage').style.display = 'none';
+            closeOverlay('settingsOverlay'); render();
+        }
+        function deleteItem(id, ev) {
+            ev.stopPropagation();
+            if(confirm("حذف؟")) {
+                db[currentUser] = db[currentUser].filter(l => l.id !== id);
+                localStorage.setItem('study_db_v14', JSON.stringify(db));
+                render();
+            }
+        }
+        function showFreeTime() {
+            alert("سيتم عرض تحليل الفترات المتاحة لليوم الحالي بناءً على جدولك.");
+        }
+
+        setInterval(render, 10000);
+        render();
+    </script>
+</body>
+</html>
