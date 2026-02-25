@@ -3,179 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="جدولنا">
-    
-    <title>Smart Schedule Pro</title>
-
-    <link rel="icon" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
+    <link rel="icon" type="image/jpg" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
     <link rel="apple-touch-icon" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
-
+    <title>Elite Schedule</title>
     <style>
-        :root {
-            --bg: #0b0e14;
-            --glass: rgba(255, 255, 255, 0.05);
-            --green: #00ff88;
-            --red: #ff3e3e;
-            --malak-grad: linear-gradient(135deg, #ff0080, #ff8c00);
-            --mohammed-grad: linear-gradient(135deg, #007cf0, #00dfd8);
-        }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg); color: white; margin: 0; padding: 15px;
-            min-height: 100vh; -webkit-tap-highlight-color: transparent;
-        }
-        .header-card {
-            background: var(--glass); padding: 20px; border-radius: 20px;
-            text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;
-        }
-        #clock { color: var(--green); font-family: monospace; font-size: 1.8rem; font-weight: bold; }
-
-        .tabs-container { display: flex; gap: 8px; margin-bottom: 20px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; background: var(--glass); color: #555; font-weight: bold; }
-        .tab-btn.active-malak { background: var(--malak-grad); color: white; }
-        .tab-btn.active-mohammed { background: var(--mohammed-grad); color: white; }
-
-        .lesson-card {
-            background: var(--glass); border-radius: 15px; padding: 15px;
-            margin-bottom: 10px; display: flex; align-items: center;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .lesson-card.live { border-color: var(--green); background: rgba(0, 255, 136, 0.05); }
-        .item-lamp { width: 10px; height: 10px; border-radius: 50%; background: var(--red); margin-left: 12px; }
-        .live .item-lamp { background: var(--green); box-shadow: 0 0 10px var(--green); animation: blink 1.5s infinite; }
-        @keyframes blink { 50% { opacity: 0.3; } }
-
-        .bottom-nav { position: fixed; bottom: 25px; left: 0; right: 0; display: flex; justify-content: center; gap: 15px; }
-        .nav-btn { width: 60px; height: 60px; border-radius: 18px; background: var(--glass); border: 1px solid rgba(255,255,255,0.1); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; backdrop-filter: blur(10px); }
-        
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .content-box { width: 100%; max-width: 400px; background: #161b22; padding: 25px; border-radius: 20px; border: 1px solid #333; }
-        .btn-save { background: var(--green); color: black; font-weight: bold; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-top: 10px; }
+        :root { --malak: #ff007a; --mohammed: #0088ff; --green: #00ff88; --yellow: #ffd700; --red: #ff3e3e; --glass: rgba(255, 255, 255, 0.08); }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #000; color: white; transition: 0.5s; overflow-x: hidden; }
+        body.malak-theme { --primary: var(--malak); --bg: #1a000d; }
+        body.mohammed-theme { --primary: var(--mohammed); --bg: #000d1a; }
+        .header { padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, var(--bg), transparent); }
+        #clock { font-size: 3.5rem; font-family: monospace; text-shadow: 0 0 20px var(--primary); direction: ltr; }
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .tab { padding: 12px 35px; border-radius: 30px; border: 1px solid var(--glass); background: var(--glass); color: white; font-weight: bold; cursor: pointer; }
+        .tab.active { background: var(--primary); box-shadow: 0 0 20px var(--primary); border: none; }
+        .container { padding: 0 20px 150px; }
+        .day-label { color: var(--primary); margin: 30px 10px 10px; font-weight: bold; border-right: 4px solid var(--primary); padding-right: 12px; }
+        .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; padding: 20px; border-radius: 20px; display: flex; align-items: center; position: relative; backdrop-filter: blur(15px); }
+        .lamp { width: 12px; height: 12px; border-radius: 50%; margin-left: 20px; background: #222; }
+        .card.live { border-color: var(--green); box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
+        .card.live .lamp { background: var(--green); box-shadow: 0 0 20px var(--green); animation: pulse 1.5s infinite; }
+        .card.next { border-color: var(--yellow); }
+        .card.next .lamp { background: var(--yellow); box-shadow: 0 0 15px var(--yellow); }
+        .card.done { opacity: 0.4; border-color: var(--red); }
+        .card.done .lamp { background: var(--red); }
+        .info b { font-size: 1.2rem; display: block; }
+        .info span { font-size: 0.9rem; color: #aaa; direction: ltr; display: inline-block; }
+        .free-slot { background: rgba(255,255,255,0.03); border-right: 3px solid var(--green); margin: 5px 30px 15px; padding: 10px; border-radius: 12px; font-size: 0.85rem; color: #888; }
+        .dock { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(10,10,10,0.95); padding: 15px 50px; border-radius: 50px; display: flex; gap: 50px; border: 1px solid var(--glass); z-index: 1000; }
+        .edit-mode .card { cursor: pointer; border-style: dashed; }
+        .del-btn { color: var(--red); margin-right: auto; font-size: 1.3rem; display: none; }
+        .edit-mode .del-btn { display: block; }
+        .add-row { width: 100%; padding: 15px; background: var(--glass); border: 2px dashed #444; color: #888; border-radius: 20px; margin-top: 15px; display: none; cursor: pointer; }
+        .edit-mode .add-row { display: block; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-box { width: 90%; max-width: 380px; background: #111; padding: 25px; border-radius: 25px; border: 1px solid var(--primary); }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; text-align: center; }
+        @keyframes pulse { 50% { opacity: 0.3; } }
     </style>
 </head>
-<body>
-
-    <div class="header-card">
-        <h2 id="userNameDisplay" style="margin:0;">جدول ملك</h2>
-        <div id="clock">00:00:00 ص</div>
+<body class="malak-theme">
+    <div class="header">
+        <div id="clock">00:00:00 AM</div>
+        <div id="adm-tag" style="color:var(--yellow); font-size:0.7rem; margin-top:10px; display:none;">وضع التعديل نشط</div>
     </div>
-
-    <div class="tabs-container">
-        <button class="tab-btn active-malak" id="tabMalak" onclick="switchUser('malak')">ملك</button>
-        <button class="tab-btn" id="tabMohammed" onclick="switchUser('mohammed')">محمد</button>
+    <div class="tabs">
+        <button class="tab active" id="tab-m" onclick="switchUser('malak')">ملك</button>
+        <button class="tab" id="tab-h" onclick="switchUser('mohammed')">محمد</button>
     </div>
-
-    <div id="scheduleBody" style="padding-bottom: 120px;"></div>
-
-    <div class="bottom-nav">
-        <button class="nav-btn" onclick="openSettings()">⚙️</button>
-        <button class="nav-btn" style="background: var(--green); color:black;" onclick="calculateFreeTime()">☕</button>
+    <div id="app" class="container"></div>
+    <div class="dock">
+        <span onclick="toggleAdmin()" style="font-size:1.6rem; cursor:pointer">⚙️</span>
+        <span onclick="location.reload()" style="font-size:1.6rem; cursor:pointer">🏠</span>
     </div>
-
-    <div id="settingsOverlay" class="overlay">
-        <div class="content-box" id="passwordStage">
-            <h3 style="text-align: center;">رمز الدخول</h3>
-            <input type="password" id="passInput" placeholder="0512" style="width:100%; padding:12px; margin:10px 0; background:#000; color:#fff; border:1px solid #333; border-radius:8px; text-align:center;">
-            <button class="btn-save" onclick="verifyPass()">فتح التعديل</button>
-            <button onclick="closeOverlay()" style="background:none; border:none; color:white; width:100%; margin-top:15px;">إلغاء</button>
-        </div>
-        <div class="content-box" id="editStage" style="display: none;">
-            <h3 style="color:var(--green); text-align:center;">إضافة مادة جديدة</h3>
-            <p style="font-size: 0.8rem; color: #888; text-align: center;">(الميزة قيد التحديث في النسخة المستقرة)</p>
-            <button onclick="logoutSettings()" class="btn-save" style="background:#555; color:#fff;">إغلاق</button>
+    <div id="editModal" class="modal">
+        <div class="modal-box">
+            <h3 id="mTitle" style="text-align:center">تعديل الدرس</h3>
+            <input type="text" id="inN" placeholder="اسم المادة">
+            <select id="inD"><option value="6">السبت</option><option value="0">الأحد</option><option value="1">الإثنين</option><option value="2">الثلاثاء</option><option value="3">الأربعاء</option><option value="4">الخميس</option></select>
+            <div style="display:flex; gap:10px;">
+                <input type="number" id="inH" placeholder="الساعة (1-12)">
+                <select id="inM"><option value="0">00</option><option value="0.5">30</option></select>
+                <select id="inA"><option value="0">ص</option><option value="12">م</option></select>
+            </div>
+            <input type="number" id="inDur" placeholder="المدة بالساعات (مثلاً 2)">
+            <button onclick="save()" style="width:100%; padding:15px; background:var(--primary); border:none; color:white; border-radius:10px; font-weight:bold; margin-top:10px;">حفظ</button>
+            <button onclick="closeM()" style="width:100%; margin-top:10px; background:none; border:none; color:gray;">إلغاء</button>
         </div>
     </div>
-
-    <script>
-        const db = {
-            malak: [
-                { name: "رياضة", day: "السبت", start: 14, end: 16 }, { name: "ألماني", day: "السبت", start: 16, end: 18 }, { name: "كيمياء", day: "السبت", start: 20.5, end: 22.5 },
-                { name: "تاريخ", day: "الأحد", start: 16, end: 18 }, { name: "عربي", day: "الأحد", start: 19, end: 21 }, { name: "كورس", day: "الأحد", start: 23, end: 25 },
-                { name: "فيزياء", day: "الإثنين", start: 14, end: 16 }, { name: "إنجليزي", day: "الإثنين", start: 16, end: 18 },
-                { name: "رياضة", day: "الثلاثاء", start: 14, end: 16 }, { name: "ألماني", day: "الثلاثاء", start: 16, end: 18 }, { name: "كيمياء", day: "الثلاثاء", start: 20.5, end: 22.5 },
-                { name: "تاريخ", day: "الأربعاء", start: 16, end: 18 }, { name: "عربي", day: "الأربعاء", start: 19, end: 21 },
-                { name: "فيزياء", day: "الخميس", start: 14, end: 16 }, { name: "إنجليزي", day: "الخميس", start: 16, end: 18 }
-            ],
-            mohammed: [
-                { name: "رياضة", day: "السبت", start: 10.5, end: 13 }, { name: "كيمياء", day: "السبت", start: 13, end: 15 }, { name: "ألماني", day: "السبت", start: 16, end: 18 },
-                { name: "فيزياء", day: "الأحد", start: 16, end: 18 }, { name: "عربي", day: "الأحد", start: 19, end: 21 },
-                { name: "رياضة", day: "الإثنين", start: 9, end: 11 }, { name: "إنجليزي", day: "الإثنين", start: 13, end: 15 }
-            ]
-        };
-
-        let currentUser = 'malak';
-
-        function updateClock() {
-            const now = new Date();
-            let h = now.getHours(), m = String(now.getMinutes()).padStart(2, '0'), s = String(now.getSeconds()).padStart(2, '0');
-            let p = h >= 12 ? 'م' : 'ص';
-            h = h % 12 || 12;
-            document.getElementById('clock').innerText = `${h}:${m}:${s} ${p}`;
-            renderStatus(now);
-        }
-
-        function render() {
-            let html = '';
-            ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"].forEach(day => {
-                const lessons = db[currentUser].filter(l => l.day === day).sort((a,b) => a.start - b.start);
-                if(lessons.length > 0) {
-                    html += `<div style="margin:20px 5px 10px; color:#555; font-size:0.8rem; font-weight:bold;">● ${day}</div>`;
-                    lessons.forEach(l => {
-                        html += `<div class="lesson-card" id="l-${l.name}-${l.day}">
-                                    <div class="item-lamp"></div>
-                                    <div style="flex-grow: 1;">
-                                        <div style="font-weight: bold;">${l.name}</div>
-                                        <div style="color: #666; font-size: 0.8rem;">${fmt(l.start)} - ${fmt(l.end)}</div>
-                                    </div>
-                                </div>`;
-                    });
-                }
-            });
-            document.getElementById('scheduleBody').innerHTML = html;
-        }
-
-        function renderStatus(now) {
-            const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-            const today = days[now.getDay()];
-            const hour = now.getHours() + (now.getMinutes()/60);
-            db[currentUser].forEach(l => {
-                const el = document.getElementById(`l-${l.name}-${l.day}`);
-                if(el) {
-                    let isLive = (l.day === today && hour >= l.start && hour < l.end);
-                    if(isLive) el.classList.add('live'); else el.classList.remove('live');
-                }
-            });
-        }
-
-        // حساب وقت الفراغ
-        function calculateFreeTime() {
-            const now = new Date();
-            const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-            const todayLessons = db[currentUser].filter(l => l.day === days[now.getDay()]).sort((a,b) => a.start - b.start);
-            const hour = now.getHours() + (now.getMinutes()/60);
-            
-            let next = todayLessons.find(l => l.start > hour);
-            if(next) {
-                let diff = (next.start - hour) * 60;
-                alert(`فاضل لك ${Math.floor(diff)} دقيقة على درس ${next.name}.. استمتع بالبريك! ☕`);
-            } else {
-                alert("خلصت دروسك النهاردة.. يومك سعيد! ✨");
+<script>
+    let current = 'malak', isEdit = false, editIdx = null;
+    const initial = {
+        malak: [
+            {n:"رياضة", d:6, s:14, e:16}, {n:"الماني", d:6, s:16, e:18}, {n:"كيميا", d:6, s:20.5, e:22.5},
+            {n:"تاريخ", d:0, s:16, e:18}, {n:"عربي", d:0, s:19, e:21}, {n:"كورس", d:0, s:23, e:25},
+            {n:"فيزيا", d:1, s:14, e:16}, {n:"إنجليزي", d:1, s:16, e:18},
+            {n:"رياضة", d:2, s:14, e:16}, {n:"الماني", d:2, s:16, e:18}, {n:"كيميا", d:2, s:20.5, e:22.5}, {n:"تحفيظ", d:2, s:23, e:25},
+            {n:"تاريخ", d:3, s:16, e:18}, {n:"عربي", d:3, s:19, e:21}, {n:"كورس", d:3, s:23, e:25},
+            {n:"فيزيا", d:4, s:14, e:16}, {n:"إنجليزي", d:4, s:16, e:18}, {n:"تحفيظ", d:4, s:23, e:25}
+        ],
+        mohammed: [
+            {n:"رياضة", d:6, s:10.5, e:13}, {n:"كيمياء", d:6, s:13, e:15}, {n:"الماني", d:6, s:16, e:18}, {n:"كورس", d:6, s:19.5, e:21.5},
+            {n:"فيزياء", d:0, s:16, e:18}, {n:"عربي", d:0, s:19, e:21},
+            {n:"رياضة", d:1, s:9, e:11}, {n:"انجليزي", d:1, s:13, e:15},
+            {n:"رياضة", d:2, s:10.5, e:13}, {n:"كيمياء", d:2, s:13, e:15}, {n:"الماني", d:2, s:16, e:18},
+            {n:"فيزياء", d:3, s:16, e:18}, {n:"عربي", d:3, s:19, e:21},
+            {n:"رياضة", d:4, s:9, e:11}, {n:"انجليزي", d:4, s:13, e:15}
+        ]
+    };
+    let db = JSON.parse(localStorage.getItem('elite_v5')) || initial;
+    function tick() {
+        const now = new Date(), h = now.getHours() + now.getMinutes()/60, d = now.getDay();
+        document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {hour12:true});
+        db[current].forEach((l, i) => {
+            const el = document.getElementById(`c-${i}`); if(!el) return;
+            el.classList.remove('live', 'next', 'done');
+            if(l.d == d) {
+                if(h >= l.s && h < l.e) el.classList.add('live');
+                else if(h < l.s) { if(l === db[current].filter(x=>x.d==d && x.s>h).sort((a,b)=>a.s-b.s)[0]) el.classList.add('next'); }
+                else el.classList.add('done');
             }
-        }
-
-        function fmt(t) { let h = Math.floor(t), m = (t % 1) !== 0 ? "30" : "00", p = h >= 12 ? "م" : "ص", dh = h % 12 || 12; return `${dh}:${m}${p}`; }
-        function switchUser(u) { currentUser = u; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-malak','active-mohammed')); document.getElementById(u==='malak'?'tabMalak':'tabMohammed').classList.add(u==='malak'?'active-malak':'active-mohammed'); document.getElementById('userNameDisplay').innerText = "جدول "+(u==='malak'?'ملك':'محمد'); render(); }
-        function openSettings() { document.getElementById('settingsOverlay').style.display='flex'; }
-        function closeOverlay() { document.getElementById('settingsOverlay').style.display='none'; }
-        function verifyPass() { if(document.getElementById('passInput').value === "0512") { document.getElementById('passwordStage').style.display='none'; document.getElementById('editStage').style.display='block'; } }
-        function logoutSettings() { document.getElementById('passwordStage').style.display='block'; document.getElementById('editStage').style.display='none'; closeOverlay(); }
-
-        setInterval(updateClock, 1000);
-        render();
-    </script>
+        });
+    }
+    function render() {
+        const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+        let html = '<div class="day-label">جدول اليوم</div>', nowD = new Date().getDay();
+        const today = db[current].filter(l => l.d == nowD).sort((a,b)=>a.s-b.s);
+        if(!today.length) html += '<div class="card">لا دروس اليوم</div>';
+        today.forEach((l, i) => {
+            if(i==0 && l.s>8) html += `<div class="free-slot">☕ فراغ: من 08:00 AM إلى ${fmt(l.s)}</div>`;
+            html += `<div class="card" id="c-${db[current].indexOf(l)}" onclick="openE(${db[current].indexOf(l)})"><div class="lamp"></div><div class="info"><b>${l.n}</b><span>${fmt(l.s)} - ${fmt(l.e)}</span></div><span class="del-btn" onclick="del(event,${db[current].indexOf(l)})">🗑️</span></div>`;
+            if(today[i+1] && today[i+1].s > l.e) html += `<div class="free-slot">☕ فراغ: من ${fmt(l.e)} إلى ${fmt(today[i+1].s)}</div>`;
+        });
+        html += '<div class="day-label">باقي الأسبوع</div>';
+        [6,0,1,2,3,4].forEach(d => { if(d != nowD) {
+            const list = db[current].filter(l => l.d == d).sort((a,b)=>a.s-b.s);
+            if(list.length) { html += `<div style="padding:10px 15px; color:var(--primary); font-size:0.8rem; font-weight:bold;">● ${days[d]}</div>`;
+            list.forEach(l => { html += `<div class="card" id="c-${db[current].indexOf(l)}" onclick="openE(${db[current].indexOf(l)})"><div class="lamp"></div><div class="info"><b>${l.n}</b><span>${fmt(l.s)} - ${fmt(l.e)}</span></div><span class="del-btn" onclick="del(event,${db[current].indexOf(l)})">🗑️</span></div>`; }); }
+        }});
+        html += `<div class="add-row" onclick="openA()">+ إضافة درس جديد</div>`;
+        document.getElementById('app').innerHTML = html; tick();
+    }
+    function fmt(t) { let h = Math.floor(t), m = t%1==0?"00":"30"; return `${h%12||12}:${m} ${h>=12?'PM':'AM'}`; }
+    function switchUser(u) { current = u; document.body.className = u+'-theme'+(isEdit?' edit-mode':''); document.getElementById('tab-m').classList.toggle('active', u=='malak'); document.getElementById('tab-h').classList.toggle('active', u=='mohammed'); render(); }
+    function toggleAdmin() { if(!isEdit) { if(prompt("الباسورد:")=="0512") { isEdit=true; document.body.classList.add('edit-mode'); document.getElementById('adm-tag').style.display='block'; render(); } } else { isEdit=false; document.body.classList.remove('edit-mode'); document.getElementById('adm-tag').style.display='none'; render(); } }
+    function openE(i) { if(!isEdit) return; editIdx = i; const l = db[current][i]; document.getElementById('inN').value=l.n; document.getElementById('inD').value=l.d; document.getElementById('inH').value=l.s%12||12; document.getElementById('inA').value=l.s>=12?12:0; document.getElementById('inDur').value=l.e-l.s; document.getElementById('editModal').style.display='flex'; }
+    function openA() { editIdx = null; document.getElementById('inN').value=""; document.getElementById('editModal').style.display='flex'; }
+    function save() { 
+        let h = parseFloat(document.getElementById('inH').value), am = parseInt(document.getElementById('inA').value), m = parseFloat(document.getElementById('inM').value);
+        let s = (h==12?am:h+am) + m, dur = parseFloat(document.getElementById('inDur').value)||2;
+        const nl = { n: document.getElementById('inN').value, d: parseInt(document.getElementById('inD').value), s: s, e: s+dur };
+        if(editIdx!==null) db[current][editIdx]=nl; else db[current].push(nl);
+        localStorage.setItem('elite_v5', JSON.stringify(db)); closeM(); render();
+    }
+    function del(e,i) { e.stopPropagation(); if(confirm("حذف؟")) { db[current].splice(i,1); localStorage.setItem('elite_v5', JSON.stringify(db)); render(); } }
+    function closeM() { document.getElementById('editModal').style.display='none'; }
+    setInterval(tick, 1000); render();
+</script>
 </body>
 </html>
