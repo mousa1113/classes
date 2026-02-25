@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Smart Schedule v20</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="جدولنا">
+    
+    <title>Smart Schedule Pro</title>
 
     <link rel="icon" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
     <link rel="apple-touch-icon" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
@@ -28,16 +32,13 @@
             background: var(--glass); padding: 20px; border-radius: 20px;
             text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;
         }
-        #clock {
-            color: var(--green); font-family: monospace;
-            font-size: 1.8rem; font-weight: bold; margin-top: 5px;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-        }
+        #clock { color: var(--green); font-family: monospace; font-size: 1.8rem; font-weight: bold; }
+
         .tabs-container { display: flex; gap: 8px; margin-bottom: 20px; }
         .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; background: var(--glass); color: #555; font-weight: bold; }
         .tab-btn.active-malak { background: var(--malak-grad); color: white; }
         .tab-btn.active-mohammed { background: var(--mohammed-grad); color: white; }
-        
+
         .lesson-card {
             background: var(--glass); border-radius: 15px; padding: 15px;
             margin-bottom: 10px; display: flex; align-items: center;
@@ -48,13 +49,12 @@
         .live .item-lamp { background: var(--green); box-shadow: 0 0 10px var(--green); animation: blink 1.5s infinite; }
         @keyframes blink { 50% { opacity: 0.3; } }
 
-        .bottom-nav { position: fixed; bottom: 20px; left: 0; right: 0; display: flex; justify-content: center; gap: 15px; }
-        .nav-btn { width: 55px; height: 55px; border-radius: 15px; background: var(--glass); border: 1px solid rgba(255,255,255,0.1); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; backdrop-filter: blur(10px); }
+        .bottom-nav { position: fixed; bottom: 25px; left: 0; right: 0; display: flex; justify-content: center; gap: 15px; }
+        .nav-btn { width: 60px; height: 60px; border-radius: 18px; background: var(--glass); border: 1px solid rgba(255,255,255,0.1); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; backdrop-filter: blur(10px); }
         
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .content-box { width: 100%; max-width: 400px; background: #161b22; padding: 20px; border-radius: 20px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 10px; box-sizing: border-box; }
-        .btn-save { background: var(--green); color: black; font-weight: bold; border: none; padding: 14px; width: 100%; border-radius: 10px; margin-top: 10px; }
+        .content-box { width: 100%; max-width: 400px; background: #161b22; padding: 25px; border-radius: 20px; border: 1px solid #333; }
+        .btn-save { background: var(--green); color: black; font-weight: bold; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -69,66 +69,54 @@
         <button class="tab-btn" id="tabMohammed" onclick="switchUser('mohammed')">محمد</button>
     </div>
 
-    <div id="scheduleBody" style="padding-bottom: 100px;"></div>
+    <div id="scheduleBody" style="padding-bottom: 120px;"></div>
 
     <div class="bottom-nav">
         <button class="nav-btn" onclick="openSettings()">⚙️</button>
+        <button class="nav-btn" style="background: var(--green); color:black;" onclick="calculateFreeTime()">☕</button>
     </div>
 
     <div id="settingsOverlay" class="overlay">
         <div class="content-box" id="passwordStage">
             <h3 style="text-align: center;">رمز الدخول</h3>
-            <input type="password" id="passInput" placeholder="0512" style="text-align: center;">
+            <input type="password" id="passInput" placeholder="0512" style="width:100%; padding:12px; margin:10px 0; background:#000; color:#fff; border:1px solid #333; border-radius:8px; text-align:center;">
             <button class="btn-save" onclick="verifyPass()">فتح التعديل</button>
             <button onclick="closeOverlay()" style="background:none; border:none; color:white; width:100%; margin-top:15px;">إلغاء</button>
         </div>
         <div class="content-box" id="editStage" style="display: none;">
-            <h3 style="color:var(--green); text-align:center;">تعديل مادة</h3>
-            <input type="hidden" id="editId">
-            <input type="text" id="subjectName" placeholder="اسم المادة">
-            <select id="daySelect"><option>السبت</option><option>الأحد</option><option>الإثنين</option><option>الثلاثاء</option><option>الأربعاء</option><option>الخميس</option><option>الجمعة</option></select>
-            <div style="display: flex; gap: 5px;"><input type="number" id="startH" placeholder="البدء"><select id="startP"><option value="PM">م</option><option value="AM">ص</option></select></div>
-            <div style="display: flex; gap: 5px;"><input type="number" id="endH" placeholder="الانتهاء"><select id="endP"><option value="PM">م</option><option value="AM">ص</option></select></div>
-            <button class="btn-save" onclick="saveEntry()">حفظ</button>
-            <button onclick="logoutSettings()" style="background:none; border:none; color:var(--red); width:100%; margin-top: 20px;">خروج</button>
+            <h3 style="color:var(--green); text-align:center;">إضافة مادة جديدة</h3>
+            <p style="font-size: 0.8rem; color: #888; text-align: center;">(الميزة قيد التحديث في النسخة المستقرة)</p>
+            <button onclick="logoutSettings()" class="btn-save" style="background:#555; color:#fff;">إغلاق</button>
         </div>
     </div>
 
     <script>
-        // الساعة بالثواني بنظام 12 ساعة
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const ampm = hours >= 12 ? 'م' : 'ص';
-            hours = hours % 12 || 12;
-            document.getElementById('clock').innerText = `${hours}:${minutes}:${seconds} ${ampm}`;
-            renderOnlyStatus(now);
-        }
-
-        // استعادة المواعيد الأصلية
         const db = {
             malak: [
-                { id: 1, name: "رياضة", day: "السبت", start: 14, end: 16 }, { id: 2, name: "ألماني", day: "السبت", start: 16, end: 18 }, { id: 3, name: "كيمياء", day: "السبت", start: 20.5, end: 22.5 },
-                { id: 4, name: "تاريخ", day: "الأحد", start: 16, end: 18 }, { id: 5, name: "عربي", day: "الأحد", start: 19, end: 21 }, { id: 6, name: "كورس", day: "الأحد", start: 23, end: 1 },
-                { id: 7, name: "فيزياء", day: "الإثنين", start: 14, end: 16 }, { id: 8, name: "إنجليزي", day: "الإثنين", start: 16, end: 18 },
-                { id: 9, name: "رياضة", day: "الثلاثاء", start: 14, end: 16 }, { id: 10, name: "ألماني", day: "الثلاثاء", start: 16, end: 18 }, { id: 11, name: "كيمياء", day: "الثلاثاء", start: 20.5, end: 22.5 }, { id: 12, name: "تحفيظ", day: "الثلاثاء", start: 23, end: 1 },
-                { id: 13, name: "تاريخ", day: "الأربعاء", start: 16, end: 18 }, { id: 14, name: "عربي", day: "الأربعاء", start: 19, end: 21 }, { id: 15, name: "كورس", day: "الأربعاء", start: 23, end: 1 },
-                { id: 16, name: "فيزياء", day: "الخميس", start: 14, end: 16 }, { id: 17, name: "إنجليزي", day: "الخميس", start: 16, end: 18 }, { id: 18, name: "تحفيظ", day: "الخميس", start: 23, end: 1 }
+                { name: "رياضة", day: "السبت", start: 14, end: 16 }, { name: "ألماني", day: "السبت", start: 16, end: 18 }, { name: "كيمياء", day: "السبت", start: 20.5, end: 22.5 },
+                { name: "تاريخ", day: "الأحد", start: 16, end: 18 }, { name: "عربي", day: "الأحد", start: 19, end: 21 }, { name: "كورس", day: "الأحد", start: 23, end: 25 },
+                { name: "فيزياء", day: "الإثنين", start: 14, end: 16 }, { name: "إنجليزي", day: "الإثنين", start: 16, end: 18 },
+                { name: "رياضة", day: "الثلاثاء", start: 14, end: 16 }, { name: "ألماني", day: "الثلاثاء", start: 16, end: 18 }, { name: "كيمياء", day: "الثلاثاء", start: 20.5, end: 22.5 },
+                { name: "تاريخ", day: "الأربعاء", start: 16, end: 18 }, { name: "عربي", day: "الأربعاء", start: 19, end: 21 },
+                { name: "فيزياء", day: "الخميس", start: 14, end: 16 }, { name: "إنجليزي", day: "الخميس", start: 16, end: 18 }
             ],
             mohammed: [
-                { id: 101, name: "رياضة", day: "السبت", start: 10.5, end: 13 }, { id: 102, name: "كيمياء", day: "السبت", start: 13, end: 15 }, { id: 103, name: "ألماني", day: "السبت", start: 16, end: 18 }, { id: 104, name: "كورس", day: "السبت", start: 19.5, end: 21.5 },
-                { id: 105, name: "فيزياء", day: "الأحد", start: 16, end: 18 }, { id: 106, name: "عربي", day: "الأحد", start: 19, end: 21 },
-                { id: 107, name: "رياضة", day: "الإثنين", start: 9, end: 11 }, { id: 108, name: "إنجليزي", day: "الإثنين", start: 13, end: 15 },
-                { id: 109, name: "رياضة", day: "الثلاثاء", start: 10.5, end: 13 }, { id: 110, name: "كيمياء", day: "الثلاثاء", start: 13, end: 15 }, { id: 111, name: "ألماني", day: "الثلاثاء", start: 16, end: 18 },
-                { id: 112, name: "فيزياء", day: "الأربعاء", start: 16, end: 18 }, { id: 113, name: "عربي", day: "الأربعاء", start: 19, end: 21 },
-                { id: 114, name: "رياضة", day: "الخميس", start: 9, end: 11 }, { id: 115, name: "إنجليزي", day: "الخميس", start: 13, end: 15 }
+                { name: "رياضة", day: "السبت", start: 10.5, end: 13 }, { name: "كيمياء", day: "السبت", start: 13, end: 15 }, { name: "ألماني", day: "السبت", start: 16, end: 18 },
+                { name: "فيزياء", day: "الأحد", start: 16, end: 18 }, { name: "عربي", day: "الأحد", start: 19, end: 21 },
+                { name: "رياضة", day: "الإثنين", start: 9, end: 11 }, { name: "إنجليزي", day: "الإثنين", start: 13, end: 15 }
             ]
         };
 
         let currentUser = 'malak';
-        let isEditMode = false;
+
+        function updateClock() {
+            const now = new Date();
+            let h = now.getHours(), m = String(now.getMinutes()).padStart(2, '0'), s = String(now.getSeconds()).padStart(2, '0');
+            let p = h >= 12 ? 'م' : 'ص';
+            h = h % 12 || 12;
+            document.getElementById('clock').innerText = `${h}:${m}:${s} ${p}`;
+            renderStatus(now);
+        }
 
         function render() {
             let html = '';
@@ -137,13 +125,12 @@
                 if(lessons.length > 0) {
                     html += `<div style="margin:20px 5px 10px; color:#555; font-size:0.8rem; font-weight:bold;">● ${day}</div>`;
                     lessons.forEach(l => {
-                        html += `<div id="lesson-${l.id}" class="lesson-card" onclick="handleEdit(${l.id})">
+                        html += `<div class="lesson-card" id="l-${l.name}-${l.day}">
                                     <div class="item-lamp"></div>
                                     <div style="flex-grow: 1;">
                                         <div style="font-weight: bold;">${l.name}</div>
                                         <div style="color: #666; font-size: 0.8rem;">${fmt(l.start)} - ${fmt(l.end)}</div>
                                     </div>
-                                    ${isEditMode ? `<button onclick="del(${l.id}, event)" style="background:none; border:none; color:var(--red);">🗑️</button>` : ''}
                                 </div>`;
                     });
                 }
@@ -151,33 +138,42 @@
             document.getElementById('scheduleBody').innerHTML = html;
         }
 
-        function renderOnlyStatus(now) {
-            const daysArr = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-            const today = daysArr[now.getDay()];
+        function renderStatus(now) {
+            const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+            const today = days[now.getDay()];
             const hour = now.getHours() + (now.getMinutes()/60);
             db[currentUser].forEach(l => {
-                const el = document.getElementById(`lesson-${l.id}`);
-                if(!el) return;
-                let isLive = (l.day === today && ((l.end > l.start && hour >= l.start && hour < l.end) || (l.end < l.start && (hour >= l.start || hour < l.end))));
-                if(isLive) el.classList.add('live'); else el.classList.remove('live');
+                const el = document.getElementById(`l-${l.name}-${l.day}`);
+                if(el) {
+                    let isLive = (l.day === today && hour >= l.start && hour < l.end);
+                    if(isLive) el.classList.add('live'); else el.classList.remove('live');
+                }
             });
         }
 
-        function fmt(t) { let h = Math.floor(t), m = (t % 1) !== 0 ? "30" : "00", p = h >= 12 ? "م" : "ص", dh = h % 12 || 12; return `${dh}:${m}${p}`; }
-        
-        function switchUser(u) {
-            currentUser = u;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-malak','active-mohammed'));
-            document.getElementById(u==='malak'?'tabMalak':'tabMohammed').classList.add(u==='malak'?'active-malak':'active-mohammed');
-            document.getElementById('userNameDisplay').innerText = "جدول "+(u==='malak'?'ملك':'محمد');
-            render();
+        // حساب وقت الفراغ
+        function calculateFreeTime() {
+            const now = new Date();
+            const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+            const todayLessons = db[currentUser].filter(l => l.day === days[now.getDay()]).sort((a,b) => a.start - b.start);
+            const hour = now.getHours() + (now.getMinutes()/60);
+            
+            let next = todayLessons.find(l => l.start > hour);
+            if(next) {
+                let diff = (next.start - hour) * 60;
+                alert(`فاضل لك ${Math.floor(diff)} دقيقة على درس ${next.name}.. استمتع بالبريك! ☕`);
+            } else {
+                alert("خلصت دروسك النهاردة.. يومك سعيد! ✨");
+            }
         }
 
+        function fmt(t) { let h = Math.floor(t), m = (t % 1) !== 0 ? "30" : "00", p = h >= 12 ? "م" : "ص", dh = h % 12 || 12; return `${dh}:${m}${p}`; }
+        function switchUser(u) { currentUser = u; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-malak','active-mohammed')); document.getElementById(u==='malak'?'tabMalak':'tabMohammed').classList.add(u==='malak'?'active-malak':'active-mohammed'); document.getElementById('userNameDisplay').innerText = "جدول "+(u==='malak'?'ملك':'محمد'); render(); }
         function openSettings() { document.getElementById('settingsOverlay').style.display='flex'; }
         function closeOverlay() { document.getElementById('settingsOverlay').style.display='none'; }
-        function verifyPass() { if(document.getElementById('passInput').value === "0512") { isEditMode = true; document.getElementById('passwordStage').style.display='none'; document.getElementById('editStage').style.display='block'; render(); } else alert("الرمز خطأ!"); }
-        function logoutSettings() { isEditMode=false; document.getElementById('passwordStage').style.display='block'; document.getElementById('editStage').style.display='none'; closeOverlay(); render(); }
-        
+        function verifyPass() { if(document.getElementById('passInput').value === "0512") { document.getElementById('passwordStage').style.display='none'; document.getElementById('editStage').style.display='block'; } }
+        function logoutSettings() { document.getElementById('passwordStage').style.display='block'; document.getElementById('editStage').style.display='none'; closeOverlay(); }
+
         setInterval(updateClock, 1000);
         render();
     </script>
