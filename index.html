@@ -7,15 +7,12 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Elite">
     <meta name="theme-color" content="#000000">
 
     <link rel="icon" type="image/jpg" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
-    <link rel="icon" type="image/jpg" sizes="32x32" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
-    <link rel="icon" type="image/jpg" sizes="192x192" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
 
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Elite Classes","short_name":"Elite","start_url":"/","display":"standalone","background_color":"#000000","theme_color":"#000000","icons":[{"src":"https://i.ibb.co/Lz0Ym4N/images.jpg","sizes":"192x192","type":"image/jpg","purpose":"any maskable"},{"src":"https://i.ibb.co/Lz0Ym4N/images.jpg","sizes":"512x512","type":"image/jpg"}]}'>
+    <link rel="manifest" id="my-manifest">
 
     <title>Elite Schedule</title>
     <style>
@@ -88,19 +85,42 @@
     </div>
 
 <script>
-    // تسجيل الخدمة الوهمية لإجبار كروم على تفعيل ميزة "التثبيت"
+    // 1. توليد المانيفست برمجياً لضمان وجود الأيقونة
+    const manifest = {
+        "name": "Elite Classes",
+        "short_name": "Elite",
+        "start_url": window.location.href,
+        "display": "standalone",
+        "background_color": "#000000",
+        "theme_color": "#000000",
+        "icons": [
+            { "src": "https://i.ibb.co/Lz0Ym4N/images.jpg", "sizes": "192x192", "type": "image/jpg", "purpose": "any maskable" },
+            { "src": "https://i.ibb.co/Lz0Ym4N/images.jpg", "sizes": "512x512", "type": "image/jpg" }
+        ]
+    };
+    const stringManifest = JSON.stringify(manifest);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(blob);
+    document.querySelector('#my-manifest').setAttribute('href', manifestURL);
+
+    // 2. تسجيل Service Worker وهمي لإجبار كروم على إظهار زر التثبيت
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGV2ZW50ID0+IHsgfSk7');
+        window.addEventListener('load', () => {
+            const swCode = "self.addEventListener('fetch', function(event) {});";
+            const swBlob = new Blob([swCode], {type: 'text/javascript'});
+            const swURL = URL.createObjectURL(swBlob);
+            navigator.serviceWorker.register(swURL).then(() => console.log('SW Registered'));
+        });
     }
 
+    // --- باقي كود الجدول (ملك ومحمد) ---
     let current = 'malak', isEdit = false, editIdx = null;
-
     const initial = {
         malak: [
-            {n:"رياضة", d:6, s:14, e:16}, {n:"ألماني", d:6, s:16, e:18}, {n:"كيمياء", d:6, s:20.5, e:22.5},
+            {n:"رياضة", d:6, s:14, e:16.5}, {n:"ألماني", d:6, s:16, e:18}, {n:"كيمياء", d:6, s:20.5, e:22.5},
             {n:"تاريخ", d:0, s:16, e:18}, {n:"عربي", d:0, s:19, e:21}, {n:"كورس", d:0, s:23, e:25},
             {n:"فيزياء", d:1, s:14, e:16}, {n:"إنجليزي", d:1, s:16, e:18},
-            {n:"رياضة", d:2, s:14, e:16}, {n:"ألماني", d:2, s:16, e:18}, {n:"كيمياء", d:2, s:20.5, e:22.5}, {n:"تحفيظ", d:2, s:23, e:25},
+            {n:"رياضة", d:2, s:14, e:16.5}, {n:"ألماني", d:2, s:16, e:18}, {n:"كيمياء", d:2, s:20.5, e:22.5}, {n:"تحفيظ", d:2, s:23, e:25},
             {n:"تاريخ", d:3, s:16, e:18}, {n:"عربي", d:3, s:19, e:21}, {n:"كورس", d:3, s:23, e:25},
             {n:"فيزياء", d:4, s:14, e:16}, {n:"إنجليزي", d:4, s:16, e:18}, {n:"تحفيظ", d:4, s:23, e:25}
         ],
@@ -114,7 +134,7 @@
         ]
     };
 
-    let db = JSON.parse(localStorage.getItem('elite_vFinal_7')) || initial;
+    let db = JSON.parse(localStorage.getItem('elite_vFinal_9')) || initial;
 
     function tick() {
         const now = new Date(), h = now.getHours() + now.getMinutes()/60, d = now.getDay();
@@ -143,7 +163,7 @@
             html += `<div class="card" id="c-${idx}" onclick="openE(${idx})"><div class="lamp"></div><div class="info"><b>${l.n}</b><span>${fmt(l.s)} - ${fmt(l.e)}</span></div><span class="del-btn" onclick="del(event,${idx})">🗑️</span></div>`;
         });
         html += '<div class="day-label">باقي الأسبوع</div>';
-        [6,0,1,2,3,4,5].forEach(d => { if(d != nowD) {
+        [6,0,1,2,3,4].forEach(d => { if(d != nowD) {
             const list = db[current].filter(l => l.d == d).sort((a,b)=>a.s-b.s);
             if(list.length) {
                 html += `<div style="padding:10px 15px; color:var(--primary); font-size:0.8rem; font-weight:bold;">● ${days[d]}</div>`;
@@ -167,9 +187,9 @@
         let s = (h==12?am:h+am) + m, dur = parseFloat(document.getElementById('inDur').value)||2;
         const nl = { n: document.getElementById('inN').value, d: parseInt(document.getElementById('inD').value), s: s, e: s+dur };
         if(editIdx!==null) db[current][editIdx]=nl; else db[current].push(nl);
-        localStorage.setItem('elite_vFinal_7', JSON.stringify(db)); closeM(); render();
+        localStorage.setItem('elite_vFinal_9', JSON.stringify(db)); closeM(); render();
     }
-    function del(e,i) { e.stopPropagation(); if(confirm("حذف؟")) { db[current].splice(i,1); localStorage.setItem('elite_vFinal_7', JSON.stringify(db)); render(); } }
+    function del(e,i) { e.stopPropagation(); if(confirm("حذف؟")) { db[current].splice(i,1); localStorage.setItem('elite_vFinal_9', JSON.stringify(db)); render(); } }
     function closeM() { document.getElementById('editModal').style.display='none'; }
     setInterval(tick, 1000); render();
 </script>
