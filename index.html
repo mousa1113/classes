@@ -78,10 +78,8 @@
     </div>
 
 <script>
-    let current = 'malak', isEdit = false, editIdx = null;
-
-    // بيانات كاملة لكل الأيام
-    const initial = {
+    // 1. البيانات الكاملة (تم التأكد من وجود الأربعاء والخميس)
+    const FULL_DATA = {
         malak: [
             {n:"رياضة", d:6, s:14, e:16}, {n:"الماني", d:6, s:16, e:18}, {n:"كيميا", d:6, s:20.5, e:22.5},
             {n:"تاريخ", d:0, s:16, e:18}, {n:"عربي", d:0, s:19, e:21}, {n:"كورس", d:0, s:23, e:25},
@@ -100,8 +98,12 @@
         ]
     };
 
-    // تغيير اسم المفتاح لضمان تحديث البيانات عند المستخدم
-    let db = JSON.parse(localStorage.getItem('elite_v2026_final_fix')) || initial;
+    // 2. إجبار التحديث: مسح أي تخزين قديم فوراً
+    localStorage.clear(); 
+    let db = FULL_DATA; 
+    localStorage.setItem('elite_vFinal_Fixed', JSON.stringify(db));
+
+    let current = 'malak', isEdit = false, editIdx = null;
 
     function render() {
         const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
@@ -118,6 +120,7 @@
         });
 
         html += '<div class="day-label">باقي الأسبوع</div>';
+        // ترتيب الأيام لعرضها بالكامل
         [6,0,1,2,3,4].forEach(d => { if(d != nowD) {
             const list = db[current].filter(l => l.d == d).sort((a,b)=>a.s-b.s);
             if(list.length) {
@@ -174,10 +177,10 @@
         let s = (h==12?am:h+am) + m, dur = parseFloat(document.getElementById('inDur').value)||2;
         const nl = { n: document.getElementById('inN').value, d: parseInt(document.getElementById('inD').value), s: s, e: s+dur };
         if(editIdx!==null) db[current][editIdx]=nl; else db[current].push(nl);
-        localStorage.setItem('elite_v2026_final_fix', JSON.stringify(db)); closeM(); render();
+        localStorage.setItem('elite_vFinal_Fixed', JSON.stringify(db)); closeM(); render();
     }
 
-    function del(e,i) { e.stopPropagation(); if(confirm("حذف؟")) { db[current].splice(i,1); localStorage.setItem('elite_v2026_final_fix', JSON.stringify(db)); render(); } }
+    function del(e,i) { e.stopPropagation(); if(confirm("حذف؟")) { db[current].splice(i,1); localStorage.setItem('elite_vFinal_Fixed', JSON.stringify(db)); render(); } }
     function closeM() { document.getElementById('editModal').style.display='none'; }
 
     setInterval(tick, 1000);
