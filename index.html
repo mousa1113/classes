@@ -12,7 +12,7 @@
     <link rel="icon" type="image/jpg" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
     <link rel="apple-touch-icon" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
 
-    <link rel="manifest" id="my-manifest">
+    <link rel="manifest" id="pwa-manifest">
 
     <title>Elite Schedule</title>
     <style>
@@ -20,29 +20,41 @@
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #000; color: white; transition: 0.5s; overflow-x: hidden; padding-top: env(safe-area-inset-top); }
         body.malak-theme { --primary: var(--malak); --bg: #1a000d; }
         body.mohammed-theme { --primary: var(--mohammed); --bg: #000d1a; }
+        
         .header { padding: 50px 20px 20px; text-align: center; background: linear-gradient(to bottom, var(--bg), transparent); }
         #clock { font-size: 3.5rem; font-family: monospace; text-shadow: 0 0 20px var(--primary); direction: ltr; }
+        
         .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
         .tab { padding: 12px 35px; border-radius: 30px; border: none; background: var(--glass); color: white; font-weight: bold; cursor: pointer; }
         .tab.active { background: var(--primary); box-shadow: 0 0 20px var(--primary); }
+
         .container { padding: 0 20px 150px; }
         .day-label { color: var(--primary); margin: 30px 10px 10px; font-weight: bold; border-right: 4px solid var(--primary); padding-right: 12px; }
+        
+        /* تصميم كروت المواد */
         .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; padding: 20px; border-radius: 20px; display: flex; align-items: center; position: relative; backdrop-filter: blur(15px); }
         .lamp { width: 12px; height: 12px; border-radius: 50%; margin-left: 20px; background: #222; }
+        
         .card.live { border-color: var(--green); box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
         .card.live .lamp { background: var(--green); box-shadow: 0 0 20px var(--green); animation: pulse 1.5s infinite; }
         .card.next { border-color: var(--yellow); }
         .card.next .lamp { background: var(--yellow); box-shadow: 0 0 15px var(--yellow); }
         .card.done { opacity: 0.4; border-color: var(--red); }
-        .card.done .lamp { background: var(--red); }
+        
+        /* ميزة وقت الفراغ */
+        .free-slot { background: rgba(255,255,255,0.03); border-right: 3px solid var(--green); margin: 5px 30px 15px; padding: 10px; border-radius: 12px; font-size: 0.85rem; color: #888; display: flex; align-items: center; gap: 8px; }
+
         .info b { font-size: 1.2rem; display: block; }
         .info span { font-size: 0.9rem; color: #aaa; direction: ltr; display: inline-block; }
+        
         .dock { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(10,10,10,0.95); padding: 15px 50px; border-radius: 50px; display: flex; gap: 50px; border: 1px solid var(--glass); z-index: 1000; }
+        
         .edit-mode .card { cursor: pointer; border-style: dashed; }
         .del-btn { color: var(--red); margin-right: auto; font-size: 1.3rem; display: none; }
         .edit-mode .del-btn { display: block; }
         .add-row { width: 100%; padding: 15px; background: var(--glass); border: 2px dashed #444; color: #888; border-radius: 20px; margin-top: 15px; display: none; cursor: pointer; text-align: center; }
         .edit-mode .add-row { display: block; }
+
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal-box { width: 90%; max-width: 380px; background: #111; padding: 25px; border-radius: 25px; border: 1px solid var(--primary); }
         input, select { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; text-align: center; }
@@ -85,7 +97,7 @@
     </div>
 
 <script>
-    // 1. توليد المانيفست برمجياً لضمان وجود الأيقونة
+    // 1. برمجة التثبيت (PWA) بالصورة
     const manifest = {
         "name": "Elite Classes",
         "short_name": "Elite",
@@ -98,22 +110,17 @@
             { "src": "https://i.ibb.co/Lz0Ym4N/images.jpg", "sizes": "512x512", "type": "image/jpg" }
         ]
     };
-    const stringManifest = JSON.stringify(manifest);
-    const blob = new Blob([stringManifest], {type: 'application/json'});
-    const manifestURL = URL.createObjectURL(blob);
-    document.querySelector('#my-manifest').setAttribute('href', manifestURL);
+    document.getElementById('pwa-manifest').href = 'data:application/json;base64,' + btoa(JSON.stringify(manifest));
 
-    // 2. تسجيل Service Worker وهمي لإجبار كروم على إظهار زر التثبيت
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             const swCode = "self.addEventListener('fetch', function(event) {});";
             const swBlob = new Blob([swCode], {type: 'text/javascript'});
-            const swURL = URL.createObjectURL(swBlob);
-            navigator.serviceWorker.register(swURL).then(() => console.log('SW Registered'));
+            navigator.serviceWorker.register(URL.createObjectURL(swBlob));
         });
     }
 
-    // --- باقي كود الجدول (ملك ومحمد) ---
+    // 2. كود الجدول ووقت الفراغ
     let current = 'malak', isEdit = false, editIdx = null;
     const initial = {
         malak: [
@@ -134,7 +141,7 @@
         ]
     };
 
-    let db = JSON.parse(localStorage.getItem('elite_vFinal_9')) || initial;
+    let db = JSON.parse(localStorage.getItem('elite_vFinal_10')) || initial;
 
     function tick() {
         const now = new Date(), h = now.getHours() + now.getMinutes()/60, d = now.getDay();
@@ -157,11 +164,22 @@
         const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
         let html = '<div class="day-label">جدول اليوم</div>', nowD = new Date().getDay();
         const today = db[current].filter(l => l.d == nowD).sort((a,b)=>a.s-b.s);
+        
         if(!today.length) html += '<div class="card">لا دروس اليوم ☕</div>';
+        
         today.forEach((l, i) => {
             const idx = db[current].indexOf(l);
+            // إضافة وقت الفراغ قبل المادة لو في وقت
+            if(i==0 && l.s > 8) html += `<div class="free-slot">☕ فراغ: من 08:00 AM إلى ${fmt(l.s)}</div>`;
+            
             html += `<div class="card" id="c-${idx}" onclick="openE(${idx})"><div class="lamp"></div><div class="info"><b>${l.n}</b><span>${fmt(l.s)} - ${fmt(l.e)}</span></div><span class="del-btn" onclick="del(event,${idx})">🗑️</span></div>`;
+            
+            // إضافة وقت الفراغ بين المواد
+            if(today[i+1] && today[i+1].s > l.e) {
+                html += `<div class="free-slot">☕ فراغ: من ${fmt(l.e)} إلى ${fmt(today[i+1].s)}</div>`;
+            }
         });
+
         html += '<div class="day-label">باقي الأسبوع</div>';
         [6,0,1,2,3,4].forEach(d => { if(d != nowD) {
             const list = db[current].filter(l => l.d == d).sort((a,b)=>a.s-b.s);
@@ -187,9 +205,9 @@
         let s = (h==12?am:h+am) + m, dur = parseFloat(document.getElementById('inDur').value)||2;
         const nl = { n: document.getElementById('inN').value, d: parseInt(document.getElementById('inD').value), s: s, e: s+dur };
         if(editIdx!==null) db[current][editIdx]=nl; else db[current].push(nl);
-        localStorage.setItem('elite_vFinal_9', JSON.stringify(db)); closeM(); render();
+        localStorage.setItem('elite_vFinal_10', JSON.stringify(db)); closeM(); render();
     }
-    function del(e,i) { e.stopPropagation(); if(confirm("حذف؟")) { db[current].splice(i,1); localStorage.setItem('elite_vFinal_9', JSON.stringify(db)); render(); } }
+    function del(e,i) { e.stopPropagation(); if(confirm("حذف؟")) { db[current].splice(i,1); localStorage.setItem('elite_vFinal_10', JSON.stringify(db)); render(); } }
     function closeM() { document.getElementById('editModal').style.display='none'; }
     setInterval(tick, 1000); render();
 </script>
