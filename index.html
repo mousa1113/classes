@@ -4,134 +4,182 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#000000">
-
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="display" content="standalone">
+    
     <link rel="icon" type="image/jpg" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
     <link rel="apple-touch-icon" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
 
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Elite Schedule","short_name":"Elite","start_url":".","display":"standalone","background_color":"#000000","theme_color":"#000000","icons":[{"src":"https://i.ibb.co/Lz0Ym4N/images.jpg","sizes":"192x192","type":"image/jpg"}]}'>
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJkZWZhdWx0X2xvY2FsZSI6ICJhciIsCiAgIm5hbWUiOiAiRWxpdGUgQ2xhc3NlcyIsCiAgInNob3J0X25hbWUiOiAiRWxpdGUiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIiMwMDAwMDAiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2kuaWJiLmNvL0x6MFltNE4vaW1hZ2VzLmpwZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvanBnIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQ==">
 
     <title>Elite Schedule</title>
     <style>
-        :root { --malak: #ff007a; --mohammed: #0088ff; --green: #00ff88; --glass: rgba(255, 255, 255, 0.08); }
-        body { margin: 0; font-family: sans-serif; background: #000; color: white; transition: 0.5s; padding-bottom: 100px; }
+        :root { --malak: #ff007a; --mohammed: #0088ff; --green: #00ff88; --yellow: #ffd700; --red: #ff3e3e; --glass: rgba(255, 255, 255, 0.08); }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #000; color: white; transition: 0.5s; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         body.malak-theme { --primary: var(--malak); --bg: #1a000d; }
         body.mohammed-theme { --primary: var(--mohammed); --bg: #000d1a; }
         
-        .header { padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, var(--bg), #000); }
-        #clock { font-size: 3rem; font-family: monospace; text-shadow: 0 0 15px var(--primary); }
-
-        .tabs { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
-        .tab { padding: 10px 30px; border-radius: 20px; border: none; background: var(--glass); color: white; font-weight: bold; }
-        .tab.active { background: var(--primary); box-shadow: 0 0 15px var(--primary); }
-
-        .container { padding: 0 20px; }
-        .day-label { color: var(--primary); margin: 20px 0 10px; font-weight: bold; border-right: 3px solid var(--primary); padding-right: 10px; }
+        /* إخفاء أي مساحات للمتصفح */
+        .header { padding: 60px 20px 30px; text-align: center; background: linear-gradient(to bottom, var(--bg), transparent); }
+        #clock { font-size: 3.5rem; font-family: monospace; text-shadow: 0 0 20px var(--primary); direction: ltr; }
         
-        .card { background: var(--glass); margin-bottom: 10px; padding: 15px; border-radius: 15px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
-        .card.live { border-color: var(--green); box-shadow: 0 0 10px rgba(0,255,136,0.2); }
-        .lamp { width: 10px; height: 10px; border-radius: 50%; margin-left: 15px; background: #333; }
-        .card.live .lamp { background: var(--green); box-shadow: 0 0 10px var(--green); animation: p 1.5s infinite; }
-        
-        /* وقت الفراغ */
-        .free-slot { background: rgba(255,255,255,0.03); margin: 5px 20px; padding: 8px; border-radius: 10px; font-size: 0.8rem; color: #777; display: flex; align-items: center; gap: 5px; border-right: 2px solid var(--green); }
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .tab { padding: 12px 35px; border-radius: 30px; border: 1px solid var(--glass); background: var(--glass); color: white; font-weight: bold; cursor: pointer; border:none; outline:none; }
+        .tab.active { background: var(--primary); box-shadow: 0 0 20px var(--primary); }
 
-        .info b { display: block; font-size: 1.1rem; }
-        .info span { font-size: 0.85rem; color: #aaa; }
-
-        .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(15,15,15,0.9); padding: 15px 40px; border-radius: 40px; display: flex; gap: 40px; border: 1px solid var(--glass); backdrop-filter: blur(10px); }
+        .container { padding: 0 20px 150px; }
+        .day-label { color: var(--primary); margin: 30px 10px 10px; font-weight: bold; border-right: 4px solid var(--primary); padding-right: 12px; }
         
-        @keyframes p { 50% { opacity: 0.3; } }
+        .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; padding: 20px; border-radius: 20px; display: flex; align-items: center; position: relative; backdrop-filter: blur(15px); }
+        .lamp { width: 12px; height: 12px; border-radius: 50%; margin-left: 20px; background: #222; }
+        
+        .card.live { border-color: var(--green); box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
+        .card.live .lamp { background: var(--green); box-shadow: 0 0 20px var(--green); animation: pulse 1.5s infinite; }
+        .card.next { border-color: var(--yellow); }
+        .card.next .lamp { background: var(--yellow); box-shadow: 0 0 15px var(--yellow); }
+        .card.done { opacity: 0.4; border-color: var(--red); }
+        .card.done .lamp { background: var(--red); }
+
+        .info b { font-size: 1.2rem; display: block; }
+        .info span { font-size: 0.9rem; color: #aaa; direction: ltr; display: inline-block; }
+        
+        .dock { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(10,10,10,0.95); padding: 15px 50px; border-radius: 50px; display: flex; gap: 50px; border: 1px solid var(--glass); z-index: 1000; }
+        
+        /* وضع التعديل */
+        .edit-mode .card { cursor: pointer; border-style: dashed; }
+        .del-btn { color: var(--red); margin-right: auto; font-size: 1.3rem; display: none; }
+        .edit-mode .del-btn { display: block; }
+        .add-row { width: 100%; padding: 15px; background: var(--glass); border: 2px dashed #444; color: #888; border-radius: 20px; margin-top: 15px; display: none; cursor: pointer; text-align:center; }
+        .edit-mode .add-row { display: block; }
+
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-box { width: 90%; max-width: 380px; background: #111; padding: 25px; border-radius: 25px; border: 1px solid var(--primary); }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; text-align: center; }
+        
+        @keyframes pulse { 50% { opacity: 0.3; } }
     </style>
 </head>
 <body class="malak-theme">
 
-    <div class="header"><div id="clock">00:00:00 AM</div></div>
+    <div class="header">
+        <div id="clock">00:00:00 AM</div>
+    </div>
 
     <div class="tabs">
-        <button class="tab active" id="btn-m" onclick="changeUser('malak')">ملك</button>
-        <button class="tab" id="btn-h" onclick="changeUser('mohammed')">محمد</button>
+        <button class="tab active" id="tab-m" onclick="switchUser('malak')">ملك</button>
+        <button class="tab" id="tab-h" onclick="switchUser('mohammed')">محمد</button>
     </div>
 
     <div id="app" class="container"></div>
 
     <div class="dock">
-        <span onclick="location.reload()">🏠</span>
-        <span onclick="alert('قريباً: تعديل المواعيد')">⚙️</span>
+        <span onclick="toggleAdmin()" style="font-size:1.6rem; cursor:pointer">⚙️</span>
+        <span onclick="location.reload()" style="font-size:1.6rem; cursor:pointer">🏠</span>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-box">
+            <h3 style="text-align:center">تعديل الدرس</h3>
+            <input type="text" id="inN" placeholder="اسم المادة">
+            <select id="inD">
+                <option value="6">السبت</option><option value="0">الأحد</option><option value="1">الإثنين</option>
+                <option value="2">الثلاثاء</option><option value="3">الأربعاء</option><option value="4">الخميس</option>
+            </select>
+            <div style="display:flex; gap:10px;">
+                <input type="number" id="inH" placeholder="الساعة">
+                <select id="inM"><option value="0">00</option><option value="0.5">30</option></select>
+                <select id="inA"><option value="0">ص</option><option value="12">م</option></select>
+            </div>
+            <input type="number" id="inDur" placeholder="المدة بالساعات">
+            <button onclick="save()" style="width:100%; padding:15px; background:var(--primary); border:none; color:white; border-radius:10px; font-weight:bold; margin-top:10px;">حفظ</button>
+            <button onclick="closeM()" style="width:100%; margin-top:10px; background:none; border:none; color:gray;">إلغاء</button>
+        </div>
     </div>
 
 <script>
-    // تسجيل الخدمة لضمان زر التثبيت
-    if ('serviceWorker' in navigator) {
-        const sw = "self.addEventListener('fetch', ()=>{});";
-        const blob = new Blob([sw], {type: 'text/javascript'});
-        navigator.serviceWorker.register(URL.createObjectURL(blob));
-    }
+    let current = 'malak', isEdit = false, editIdx = null;
 
-    let user = 'malak';
-    const data = {
+    const initial = {
         malak: [
-            {n:"رياضة", d:6, s:14, e:16.5}, {n:"ألماني", d:6, s:16, e:18}, {n:"كيمياء", d:6, s:20.5, e:22.5},
+            {n:"رياضة", d:6, s:14, e:16}, {n:"ألماني", d:6, s:16, e:18}, {n:"كيمياء", d:6, s:20.5, e:22.5},
             {n:"تاريخ", d:0, s:16, e:18}, {n:"عربي", d:0, s:19, e:21}, {n:"كورس", d:0, s:23, e:25},
-            {n:"فيزياء", d:1, s:14, e:16}, {n:"إنجليزي", d:1, s:16, e:18}
+            {n:"فيزياء", d:1, s:14, e:16}, {n:"إنجليزي", d:1, s:16, e:18},
+            {n:"رياضة", d:2, s:14, e:16}, {n:"ألماني", d:2, s:16, e:18}, {n:"كيمياء", d:2, s:20.5, e:22.5}, {n:"تحفيظ", d:2, s:23, e:25},
+            {n:"تاريخ", d:3, s:16, e:18}, {n:"عربي", d:3, s:19, e:21}, {n:"كورس", d:3, s:23, e:25},
+            {n:"فيزياء", d:4, s:14, e:16}, {n:"إنجليزي", d:4, s:16, e:18}, {n:"تحفيظ", d:4, s:23, e:25}
         ],
         mohammed: [
-            {n:"رياضة", d:6, s:10.5, e:13}, {n:"كيمياء", d:6, s:13, e:15}, {n:"ألماني", d:6, s:16, e:18}
+            {n:"رياضة", d:6, s:10.5, e:13}, {n:"كيمياء", d:6, s:13, e:15}, {n:"ألماني", d:6, s:16, e:18}, {n:"كورس", d:6, s:19.5, e:21},
+            {n:"فيزياء", d:0, s:16, e:18}, {n:"عربي", d:0, s:19, e:21},
+            {n:"رياضة", d:2, s:10.5, e:13}, {n:"كيمياء", d:2, s:13, e:15}, {n:"ألماني", d:2, s:16, e:18},
+            {n:"فيزياء", d:3, s:16, e:18}, {n:"عربي", d:3, s:19, e:21},
+            {n:"إنجليزي", d:1, s:13, e:15}, {n:"رياضة", d:1, s:21, e:23},
+            {n:"إنجليزي", d:4, s:13, e:15}, {n:"رياضة", d:4, s:21, e:23}
         ]
     };
 
+    let db = JSON.parse(localStorage.getItem('elite_vFinal')) || initial;
+
+    function tick() {
+        const now = new Date(), h = now.getHours() + now.getMinutes()/60, d = now.getDay();
+        document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {hour12:true});
+        db[current].forEach((l, i) => {
+            const el = document.getElementById(`c-${i}`); if(!el) return;
+            el.classList.remove('live', 'next', 'done');
+            if(l.d == d) {
+                if(h >= l.s && h < l.e) el.classList.add('live');
+                else if(h < l.s) { 
+                    const future = db[current].filter(x=>x.d==d && x.s>h).sort((a,b)=>a.s-b.s);
+                    if(l === future[0]) el.classList.add('next'); 
+                }
+                else el.classList.add('done');
+            }
+        });
+    }
+
     function render() {
         const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-        const now = new Date(), d = now.getDay(), h = now.getHours() + now.getMinutes()/60;
-        let html = '<div class="day-label">الجدول الدراسي</div>';
-
-        const todayList = data[user].filter(x => x.d === d).sort((a,b)=>a.s-b.s);
+        let html = '<div class="day-label">جدول اليوم</div>', nowD = new Date().getDay();
+        const today = db[current].filter(l => l.d == nowD).sort((a,b)=>a.s-b.s);
         
-        if(todayList.length === 0) {
-            html += '<div class="card">استراحة اليوم ☕</div>';
-        } else {
-            todayList.forEach((item, i) => {
-                // إضافة وقت الفراغ
-                if(i === 0 && item.s > 9) html += `<div class="free-slot">☕ وقت فراغ حتى ${fmt(item.s)}</div>`;
-                if(i > 0 && item.s > todayList[i-1].e) html += `<div class="free-slot">☕ وقت فراغ: ${fmt(todayList[i-1].e)} - ${fmt(item.s)}</div>`;
-                
-                const isLive = (h >= item.s && h < item.e);
-                html += `
-                    <div class="card ${isLive?'live':''}">
-                        <div class="lamp"></div>
-                        <div class="info">
-                            <b>${item.n}</b>
-                            <span>${fmt(item.s)} - ${fmt(item.e)}</span>
-                        </div>
-                    </div>`;
-            });
-        }
-        document.getElementById('app').innerHTML = html;
+        if(!today.length) html += '<div class="card">لا دروس اليوم ☕</div>';
+        today.forEach((l, i) => {
+            const idx = db[current].indexOf(l);
+            html += `<div class="card" id="c-${idx}" onclick="openE(${idx})"><div class="lamp"></div><div class="info"><b>${l.n}</b><span>${fmt(l.s)} - ${fmt(l.e)}</span></div><span class="del-btn" onclick="del(event,${idx})">🗑️</span></div>`;
+        });
+
+        html += '<div class="day-label">باقي الأسبوع</div>';
+        [6,0,1,2,3,4].forEach(d => { if(d != nowD) {
+            const list = db[current].filter(l => l.d == d).sort((a,b)=>a.s-b.s);
+            if(list.length) {
+                html += `<div style="padding:10px 15px; color:var(--primary); font-size:0.8rem; font-weight:bold;">● ${days[d]}</div>`;
+                list.forEach(l => {
+                    const idx = db[current].indexOf(l);
+                    html += `<div class="card" id="c-${idx}" onclick="openE(${idx})"><div class="lamp"></div><div class="info"><b>${l.n}</b><span>${fmt(l.s)} - ${fmt(l.e)}</span></div><span class="del-btn" onclick="del(event,${idx})">🗑️</span></div>`;
+                });
+            }
+        }});
+        html += `<div class="add-row" onclick="openA()">+ إضافة مادة جديدة</div>`;
+        document.getElementById('app').innerHTML = html; tick();
     }
 
-    function fmt(t) {
-        let hr = Math.floor(t), min = (t%1==0)?'00':'30', m = hr>=12?'PM':'AM';
-        return `${hr%12||12}:${min} ${m}`;
+    function fmt(t) { let h = Math.floor(t), m = t%1==0?"00":"30"; return `${h%12||12}:${m} ${h>=12?'PM':'AM'}`; }
+    function switchUser(u) { current = u; document.body.className = u+'-theme'+(isEdit?' edit-mode':''); document.getElementById('tab-m').classList.toggle('active', u=='malak'); document.getElementById('tab-h').classList.toggle('active', u=='mohammed'); render(); }
+    function toggleAdmin() { if(!isEdit) { if(prompt("الباسورد:")=="0512") { isEdit=true; document.body.classList.add('edit-mode'); render(); } } else { isEdit=false; document.body.classList.remove('edit-mode'); render(); } }
+    function openE(i) { if(!isEdit) return; editIdx = i; const l = db[current][i]; document.getElementById('inN').value=l.n; document.getElementById('inD').value=l.d; document.getElementById('inH').value=l.s%12||12; document.getElementById('inA').value=l.s>=12?12:0; document.getElementById('inDur').value=l.e-l.s; document.getElementById('editModal').style.display='flex'; }
+    function openA() { editIdx = null; document.getElementById('inN').value=""; document.getElementById('editModal').style.display='flex'; }
+    function save() { 
+        let h = parseFloat(document.getElementById('inH').value), am = parseInt(document.getElementById('inA').value), m = parseFloat(document.getElementById('inM').value);
+        let s = (h==12?am:h+am) + m, dur = parseFloat(document.getElementById('inDur').value)||2;
+        const nl = { n: document.getElementById('inN').value, d: parseInt(document.getElementById('inD').value), s: s, e: s+dur };
+        if(editIdx!==null) db[current][editIdx]=nl; else db[current].push(nl);
+        localStorage.setItem('elite_vFinal', JSON.stringify(db)); closeM(); render();
     }
-
-    function changeUser(u) {
-        user = u;
-        document.body.className = u + '-theme';
-        document.getElementById('btn-m').classList.toggle('active', u==='malak');
-        document.getElementById('btn-h').classList.toggle('active', u==='mohammed');
-        render();
-    }
-
-    setInterval(() => {
-        const now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {hour12:true});
-        render();
-    }, 1000);
-
-    render();
+    function del(e,i) { e.stopPropagation(); if(confirm("حذف؟")) { db[current].splice(i,1); localStorage.setItem('elite_vFinal', JSON.stringify(db)); render(); } }
+    function closeM() { document.getElementById('editModal').style.display='none'; }
+    setInterval(tick, 1000); render();
 </script>
 </body>
 </html>
