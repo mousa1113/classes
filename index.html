@@ -2,26 +2,94 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Elite Schedule - Final</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/jpg" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/Lz0Ym4N/images.jpg">
+    <title>Elite Schedule</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; text-align: right; }
-        .day-title { color: #ff007a; border-right: 4px solid #ff007a; padding-right: 10px; margin: 20px 0 10px; font-size: 1.5rem; }
-        .card { background: #1a1a1a; padding: 15px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #333; }
-        .time { color: #888; font-size: 0.9rem; }
+        :root { --malak: #ff007a; --mohammed: #0088ff; --green: #00ff88; --yellow: #ffd700; --red: #ff3e3e; --glass: rgba(255, 255, 255, 0.08); }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #000; color: white; transition: 0.5s; overflow-x: hidden; }
+        body.malak-theme { --primary: var(--malak); --bg: #1a000d; }
+        body.mohammed-theme { --primary: var(--mohammed); --bg: #000d1a; }
+        .header { padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, var(--bg), transparent); }
+        #clock { font-size: 3.5rem; font-family: monospace; text-shadow: 0 0 20px var(--primary); direction: ltr; }
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .tab { padding: 12px 35px; border-radius: 30px; border: 1px solid var(--glass); background: var(--glass); color: white; font-weight: bold; cursor: pointer; }
+        .tab.active { background: var(--primary); box-shadow: 0 0 20px var(--primary); border: none; }
+        .container { padding: 0 20px 150px; }
+        .day-label { color: var(--primary); margin: 30px 10px 10px; font-weight: bold; border-right: 4px solid var(--primary); padding-right: 12px; }
+        .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; padding: 20px; border-radius: 20px; display: flex; align-items: center; position: relative; backdrop-filter: blur(15px); }
+        .lamp { width: 12px; height: 12px; border-radius: 50%; margin-left: 20px; background: #222; }
+        .card.live { border-color: var(--green); box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
+        .card.live .lamp { background: var(--green); box-shadow: 0 0 20px var(--green); animation: pulse 1.5s infinite; }
+        .info b { font-size: 1.2rem; display: block; }
+        .info span { font-size: 0.9rem; color: #aaa; direction: ltr; display: inline-block; }
+        .dock { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(10,10,10,0.95); padding: 15px 50px; border-radius: 50px; display: flex; gap: 50px; border: 1px solid var(--glass); z-index: 1000; }
+        @keyframes pulse { 50% { opacity: 0.3; } }
     </style>
 </head>
-<body>
+<body class="malak-theme">
+    <div class="header">
+        <div id="clock">00:00:00 AM</div>
+    </div>
+    <div class="tabs">
+        <button class="tab active" id="tab-m" onclick="switchUser('malak')">ملك</button>
+        <button class="tab" id="tab-h" onclick="switchUser('mohammed')">محمد</button>
+    </div>
+    <div id="app" class="container"></div>
+    <div class="dock">
+        <span onclick="location.reload()" style="font-size:1.6rem; cursor:pointer">🏠</span>
+    </div>
 
-    <div class="day-title">يوم الأربعاء</div>
-    <div class="card"><b>تاريخ</b><br><span class="time">4:00 PM - 6:00 PM</span></div>
-    <div class="card"><b>عربي</b><br><span class="time">7:00 PM - 9:00 PM</span></div>
-    <div class="card"><b>كورس</b><br><span class="time">11:00 PM - 1:00 AM</span></div>
+<script>
+    const db = {
+        malak: [
+            {n:"تاريخ", d:3, s:16, e:18}, {n:"عربي", d:3, s:19, e:21}, {n:"كورس", d:3, s:23, e:25},
+            {n:"فيزياء", d:4, s:14, e:16}, {n:"إنجليزي", d:4, s:16, e:18}, {n:"تحفيظ", d:4, s:23, e:25}
+        ],
+        mohammed: [
+            {n:"فيزياء", d:3, s:16, e:18}, {n:"عربي", d:3, s:19, e:21},
+            {n:"رياضة", d:4, s:21, e:23}, {n:"انجليزي", d:4, s:13, e:15}
+        ]
+    };
 
-    <div class="day-title">يوم الخميس (الجديد)</div>
-    <div class="card" style="border-color: #00ff88;"><b>فيزيا (ملك) / رياضة (محمد)</b><br><span class="time">حسب جدولك المعتاد</span></div>
-    <div class="card"><b>إنجليزي / إلماني</b><br><span class="time">بعد الحصة الأولى</span></div>
-    <div class="card"><b>تحفيظ</b><br><span class="time">11:00 PM</span></div>
+    let current = 'malak';
 
-    <p style="text-align:center; color:gray; margin-top:50px;">لو لسه مش شايف الخميس، امسح الـ Shortcut القديم وافتح اللينك تاني.</p>
+    function render() {
+        const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+        let html = '', nowD = new Date().getDay();
+        
+        [3, 4].forEach(d => {
+            const list = db[current].filter(l => l.d == d).sort((a,b)=>a.s-b.s);
+            if(list.length) {
+                html += `<div class="day-label">${days[d]} ${d==nowD?'(اليوم)':''}</div>`;
+                list.forEach(l => {
+                    html += `<div class="card" id="c-${db[current].indexOf(l)}"><div class="lamp"></div><div class="info"><b>${l.n}</b><span>${fmt(l.s)} - ${fmt(l.e)}</span></div></div>`;
+                });
+            }
+        });
+        document.getElementById('app').innerHTML = html;
+        tick();
+    }
+
+    function fmt(t) { let h = Math.floor(t), m = t%1==0?"00":"30"; return `${h%12||12}:${m} ${h>=12?'PM':'AM'}`; }
+    
+    function tick() {
+        const now = new Date(), h = now.getHours() + now.getMinutes()/60, d = now.getDay();
+        document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {hour12:true});
+        db[current].forEach((l, i) => {
+            const el = document.getElementById(`c-${i}`); if(!el) return;
+            el.classList.remove('live');
+            if(l.d == d && h >= l.s && h < l.e) el.classList.add('live');
+        });
+    }
+
+    function switchUser(u) { current = u; document.body.className = u+'-theme'; document.getElementById('tab-m').classList.toggle('active', u=='malak'); document.getElementById('tab-h').classList.toggle('active', u=='mohammed'); render(); }
+
+    setInterval(tick, 1000);
+    render();
+</script>
 </body>
 </html>
